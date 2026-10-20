@@ -1,1 +1,11 @@
-# 自动生成：bash .fork/bin/fork-status.sh --ledger
+# patch 台账（自动生成，勿手改）
+
+生成时间: 2026-10-20T07:30:51Z ｜ 上游: `upstream/main` @ e348fc17 ｜ 集成分支: `dev`
+
+每行的明细在 `docs/fork/patches/`。改 patch 就改那里的文件，再重建本表。
+
+| # | 提交 | 改动文件 | 龄期(天) | 明细文档 |
+|---|---|---|---|---|
+| 000 | patch(000): chore(fork): 初始化二开脚手架 | 17 | 0 | (脚手架) |
+
+合计: 1 个 patch（预算 40）

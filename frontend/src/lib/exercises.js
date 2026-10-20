@@ -2,6 +2,11 @@ import { EXDB, EXALIAS } from './exercises-data.js'
 import MUSCLE_MAP from './exercise-muscle-map.json' with { type: 'json' }
 import V13_IDS from './catalogue-v13-ids.json' with { type: 'json' }
 import { t, getVersion, exerciseNameSearchText } from './i18n-core.js'
+// 二开 patch(001): 动作名的拼音首字母索引（离线生成，无运行时依赖）。
+// 让中文界面下输入 "wt" 也能找到 "…卧推"。见 docs/fork/patches/001-pinyin-search.md
+import EX_PINYIN from './exercise-pinyin.json' with { type: 'json' }
+
+const CJK = /[\u3400-\u9fff]/
 
 export { EXDB }
 
@@ -310,6 +315,8 @@ function corpusOf(e) {
   if (hit && hit.v === v) return hit
   const sm = Array.isArray(e?.sm) ? e.sm : []
   const name = normalizeStr(exerciseNameSearchText(e))
+  // 二开 patch(001): 名字确实含中文时才挂拼音首字母（英文界面下名字是英文，不引入无谓匹配）
+  const pinyin = CJK.test(name) ? (EX_PINYIN[e?.id] || '') : ''
   const s = normalizeStr([
     name,
     e?.tg || '', t(e?.tg || ''),
@@ -317,7 +324,7 @@ function corpusOf(e) {
     e?.bp || '', t(e?.bp || ''),
     ...sm, ...sm.map(m => t(m)),
     e?.desc || ''
-  ].join(' '))
+  ].join(' ')) + (pinyin ? ' ' + pinyin : '')
   // The name run together, so "benchpress" or "bench-press" finds "bench press" the way "pullup"
   // already found the names that spell it that way (QA 1.3.9). Name only: joined across fields,
   // a body part and an equipment word would start matching as one.
