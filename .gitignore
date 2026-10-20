@@ -30,3 +30,6 @@ frontend/bundle-size.json
 
 # Local planning notes
 docs/superpowers/plans/
+
+# fork-thin-patch: cron/fetch/临时状态
+.fork/state/
