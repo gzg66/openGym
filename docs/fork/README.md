@@ -1,7 +1,7 @@
 # 二开说明（fork 分支）
 
 > 这份仓库是 [`https://github.com/DuarteSantos8/openGym.git`](https://github.com/DuarteSantos8/openGym.git) 的二开分支。
-> 上游主分支：`main` ｜ 我们的工作分支：`dev`
+> 上游主分支：`main` ｜ **我们的产品线：`main`** ｜ 上游镜像：`upstream-mirror`
 > 初始化日期：2026-10-20
 
 ## 一句话规则
@@ -12,18 +12,23 @@
 
 | 分支 | 含义 | 允许的操作 |
 |---|---|---|
-| `main` | 上游镜像，**永远等于** `upstream/main` | 只允许 fast-forward。**禁止直接提交**（pre-commit 会拒） |
-| `dev` | 我们的 patch 层：`{上游基线} + N 个 patch 提交` | 所有二开工作都在这里 |
-| `patch/NNN-xxx` | 单个 patch 的独立分支（可选，需要评审/可能推上游时用） | 从 `dev` 切出，合回后删除 |
+| `main` | **产品线**：`{上游基线} + N 个 patch 提交` | 所有二开工作都在这里 |
+| `upstream-mirror` | 上游镜像，**永远等于** `upstream/main` | 只允许 fast-forward。**禁止直接提交**（hooks 会拒） |
+| `patch/NNN-xxx` | 单个 patch 的独立分支（可选，需要评审/可能推上游时用） | 从 `main` 切出，合回后删除 |
+
+> 为什么不是「main 做镜像、二开放 dev」：我们**不打算给上游提 PR**（fork 自用产品），
+> "干净历史方便 PR" 的收益为 0；反过来把 `main` 当产品线，日常操作更符合直觉，
+> fork 首页直接显示我们的改动。判据见 skill 里「布局选择」一节。
 
 远程：`upstream` = 原项目（只读），`origin` = 我们自己的 fork。
 
 | 远端 | 地址 | 用途 |
 |---|---|---|
 | `upstream` | https://github.com/DuarteSantos8/openGym.git | 只 fetch，永不 push |
-| `origin` | https://github.com/gzg66/openGym.git | 推 `main` + `dev`（真 fork，服务端已有上游对象） |
+| `origin` | https://github.com/gzg66/openGym.git | 推 `main` + `upstream-mirror`（真 fork，服务端已有上游对象） |
 
-`remote.pushDefault=origin`，所以直接 `git push` 就推 fork（`main` 仍追踪 `upstream/main`，便于看落后多少）。
+`remote.pushDefault=origin`，所以直接 `git push` 就推 fork；`upstream-mirror` 追踪 `upstream/main`，
+看落后多少用 `git log --oneline upstream-mirror..upstream/main`。
 
 ## 一个 patch 长什么样
 
@@ -54,12 +59,13 @@ bash .fork/bin/fork-doctor.sh            # 薄层体检（有 FAIL 就别推）
 1. `fork-sync.sh --check` 看冲突面（无重叠 = 低风险，>5 文件 = 高风险）
 2. 低风险直接 `--apply`；高风险先 `git branch backup/$(date +%F)` 再上
 3. 冲突解法记进 [`CONFLICTS.md`](CONFLICTS.md)，同步结果记进 [`SYNC-LOG.md`](SYNC-LOG.md)
-4. `fork-doctor.sh` 绿了才推：`git push origin main dev`
+4. `fork-doctor.sh` 绿了才推：`git push origin main upstream-mirror`
 
 ## 硬红线
 
-- ❌ 在 `main` 上提交
-- ❌ `git merge upstream/main` 进 `dev`（必须 rebase）
+- ❌ 在 `upstream-mirror` 上提交（它必须永远等于上游）
+- ❌ `git merge upstream/main` 进 `main`（上游是细粒度提交历史 → 必须 rebase；
+     只有上游“整版快照”式发布时才改用 merge，见 skill 的同步策略）
 - ❌ 一个 patch 里混入格式化/重排/重命名
 - ❌ 改了源码但没写 `docs/fork/patches/*.md`
 - ❌ 直接改第三方 vendored 目录而不在台账里登记
@@ -69,6 +75,6 @@ bash .fork/bin/fork-doctor.sh            # 薄层体检（有 FAIL 就别推）
 不要硬 rebase。做法：
 1. `git switch -c next-upstream upstream/main` 冻结旧维护分支
 2. 在新分支上按台账逐个 patch **重新实现**（不是重放），能删的删、能换成钩子的换
-3. 全绿后 `dev` 改名归档，新分支接任
+3. 全绿后 `main` 改名归档（`main-v1`），新分支接任
 
 见 `SYNC-LOG.md` 里的「大版本迁移」记录。

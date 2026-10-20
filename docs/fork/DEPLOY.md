@@ -50,7 +50,7 @@ sg docker -c 'docker compose build api web && docker compose up -d'
 
 ```bash
 bash .fork/bin/fork-sync.sh --check
-bash .fork/bin/fork-sync.sh --apply        # rebase patch 层
+bash .fork/bin/fork-sync.sh --apply        # 重放 patch 层（main 之上）
 sg docker -c 'docker compose build api web && docker compose up -d'
 bash .fork/bin/fork-doctor.sh
 ```

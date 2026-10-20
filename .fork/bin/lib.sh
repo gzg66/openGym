@@ -41,6 +41,7 @@ fork_load() {
   : "${UPSTREAM_URL:=}"
   : "${FETCH_MAX_AGE_HOURS:=6}"
   : "${GIT_PROXY:=}"
+  : "${MERGE_UPSTREAM:=0}"
   # cron/systemd 里没有 shell 的代理变量，配置里写了就用它
   if [ -n "$GIT_PROXY" ]; then
     export https_proxy="$GIT_PROXY" http_proxy="$GIT_PROXY" HTTPS_PROXY="$GIT_PROXY" HTTP_PROXY="$GIT_PROXY"

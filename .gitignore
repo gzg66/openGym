@@ -33,3 +33,7 @@ docs/superpowers/plans/
 
 # fork-thin-patch: cron/fetch/临时状态
 .fork/state/
+
+# fork-thin-patch: bin/ 类规则会连带忽略 .fork/bin，这里取回
+!.fork/bin/
+!.fork/bin/**

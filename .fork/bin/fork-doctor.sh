@@ -30,9 +30,11 @@ else
   bad "镜像分支 $MIRROR_BRANCH 不存在"
 fi
 
-# 2) patch 层里不能混入上游的 merge commit
+# 2) patch 层里不能混入上游的 merge commit（快照式上游 = merge 模型时豁免，见 references/layout-and-sync.md）
 MERGES="$(git rev-list --merges "$UP..$INTEGRATION_BRANCH" 2>/dev/null | wc -l | tr -d ' ')"
-if [ "$MERGES" -gt 0 ]; then
+if [ "${MERGE_UPSTREAM:-0}" = "1" ]; then
+  dim "MERGE_UPSTREAM=1：快照式上游，跳过「无 merge 提交」检查（只校验镜像纯净）"
+elif [ "$MERGES" -gt 0 ]; then
   bad "集成分支含 $MERGES 个 merge 提交 —— 说明曾经 git merge upstream 进来，薄层已断。
     修: 回到 rebase 模型；历史已脏的话用
     git rebase --onto $UP <旧基线> $INTEGRATION_BRANCH"
